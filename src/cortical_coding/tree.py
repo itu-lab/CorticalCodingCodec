@@ -164,8 +164,7 @@ if __name__ == "__main__":
     # Example usage: Print structure and salaries
     def print_organization(node, indent=0):
         data = node.get_data()
-        salary = data.item() if data is not None and isinstance(data, np.ndarray) else "N/A"
-        print("  " * indent + f"{node.name}: ${salary}")
+        print("  " * indent + f"{node.name}: ${data}")
         for child in node.children:
             print_organization(child, indent + 1)
 
@@ -173,6 +172,6 @@ if __name__ == "__main__":
     print_organization(ceo)
 
     # Example usage: Adjust salaries
-    finance_dept.set_data(np.array([550000.0]))  # Adjust salary
+    finance_dept.set_data(np.array(550000.0))  # Adjust salary
     print("\nUpdated Salaries:")
     print_organization(ceo)
