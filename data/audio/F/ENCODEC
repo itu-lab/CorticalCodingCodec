@@ -1,0 +1,78 @@
+F_60 uses 48k samplerate
+F_40 uses 32k samplerate
+F_20 uses 24k samplerate 
+- so they cheat on the samplerate to save bandwidth.
+
+Compression ratio is calculated as:
+24
+saz.wav - CR: 29.37
+saz-riff-v2.wav - CR: 29.35
+anatolian-oud.wav - CR: 29.40
+oud-melody.wav - CR: 29.40
+ney-on-c.wav - CR: 29.40
+santour-melody.wav - CR: 29.40
+darbuka.wav - CR: 29.40
+darbuka2.wav - CR: 29.38
+daf.wav - CR: 29.37
+p345_006.wav - CR: 31.94
+p361_006.wav - CR: 31.99
+32
+saz.wav - CR: 58.07
+saz-riff-v2.wav - CR: 58.14
+anatolian-oud.wav - CR: 58.18
+oud-melody.wav - CR: 58.18
+ney-on-c.wav - CR: 58.18
+santour-melody.wav - CR: 58.18
+darbuka.wav - CR: 58.11
+darbuka2.wav - CR: 58.05
+daf.wav - CR: 58.12
+p345_006.wav - CR: 29.04
+p361_006.wav - CR: 29.02
+48
+saz.wav - CR: 52.30
+saz-riff-v2.wav - CR: 52.36
+anatolian-oud.wav - CR: 52.27
+oud-melody.wav - CR: 52.27
+ney-on-c.wav - CR: 52.27
+santour-melody.wav - CR: 52.27
+darbuka.wav - CR: 57.02
+darbuka2.wav - CR: 51.89
+daf.wav - CR: 52.21
+p345_006.wav - CR: 31.21
+p361_006.wav - CR: 27.91
+
+
+Encoded bits:
+{32: {'saz.wav': 1024657,
+  'saz-riff-v2.wav': 1025793,
+  'anatolian-oud.wav': 1024045,
+  'oud-melody.wav': 1024045,
+  'ney-on-c.wav': 1024045,
+  'santour-melody.wav': 1024045,
+  'darbuka.wav': 1365381,
+  'darbuka2.wav': 1016625,
+  'daf.wav': 1022989,
+  'p345_006.wav': 437019,
+  'p361_006.wav': 390743},
+ 24: {'saz.wav': 353021,
+  'saz-riff-v2.wav': 353412,
+  'anatolian-oud.wav': 352811,
+  'oud-melody.wav': 352811,
+  'ney-on-c.wav': 352811,
+  'santour-melody.wav': 352811,
+  'darbuka.wav': 470411,
+  'darbuka2.wav': 350254,
+  'daf.wav': 352446,
+  'p345_006.wav': 327752,
+  'p361_006.wav': 293045},
+ 48: {'saz.wav': 1412085,
+  'saz-riff-v2.wav': 1413649,
+  'anatolian-oud.wav': 1411245,
+  'oud-melody.wav': 1411245,
+  'ney-on-c.wav': 1411245,
+  'santour-melody.wav': 1411245,
+  'darbuka.wav': 1881645,
+  'darbuka2.wav': 1401017,
+  'daf.wav': 1409785,
+  'p345_006.wav': 655505,
+  'p361_006.wav': 586091}}
