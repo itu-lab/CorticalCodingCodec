@@ -21,13 +21,6 @@ class Node():
     def add_child(self, data:np.ndarray, **kwargs) -> 'Node':
         new_child = Node(self, **kwargs)
         return self.children.add_child(data, new_child)
-    def index_search(self, data:np.ndarray, side:str='left') -> 'Node':
-        return np.searchsorted(self.data_vector, data, side=side).item()
-    def find_index(self, data:np.ndarray, side:str='left') -> 'Node':
-        if self.parent is None:
-            return self.index_search(data, side)
-        else:
-            return self.parent.index_search(data, side)
     def __repr__(self):
         return f"Node({self.level}:{self.get_data()})"
     
@@ -41,7 +34,7 @@ class NodeChildren():
         self.maturity_mask = np.array([], dtype=np.bool_)
 
     def find_index(self, data:np.ndarray, side:str='left') -> 'Node':
-        return self.owner.find_index(data, side) 
+        return np.searchsorted(self.data_vector, data, side=side).item()
     
     def add_child(self, data:np.ndarray, new_child:Node) -> Node:
         i = self.find_index(data)
@@ -113,48 +106,66 @@ class Tree():
 
         recurse(self.root)
         return np.asarray(all_paths)
-
+    
 
 if __name__ == "__main__":
     # Example: Organizational Hierarchy Tree
     # Root represents the CEO, children represent departments, sub-children represent teams
 
     # Initialize the root node (CEO)
-    ceo = Node()
-    ceo.set_data(np.array(["CEO", 1000000], dtype=object))  # [Name, Salary]
+    organization = Node()
+
+    # add management
+    ceo = organization.add_child(np.array([1000000.0])) # Salary only
+    ceo.name = "CEO"
 
     # Add departments
-    finance_dept = ceo.add_child(np.array(["Finance Department", 500000], dtype=object))
-    tech_dept = ceo.add_child(np.array(["Tech Department", 700000], dtype=object))
-    sales_dept = ceo.add_child(np.array(["Sales Department", 600000], dtype=object))
+    finance_dept = ceo.add_child(np.array([500000.0]))  # Salary only
+    finance_dept.name = "Finance Department"
+
+    tech_dept = ceo.add_child(np.array([700000.0]))  # Salary only
+    tech_dept.name = "Tech Department"
+
+    sales_dept = ceo.add_child(np.array([600000.0]))  # Salary only
+    sales_dept.name = "Sales Department"
 
     # Add teams to the Finance Department
-    accounting_team = finance_dept.add_child(np.array(["Accounting Team", 200000], dtype=object))
-    auditing_team = finance_dept.add_child(np.array(["Auditing Team", 300000], dtype=object))
+    accounting_team = finance_dept.add_child(np.array([200000.0]))  # Salary only
+    accounting_team.name = "Accounting Team"
+
+    auditing_team = finance_dept.add_child(np.array([300000.0]))  # Salary only
+    auditing_team.name = "Auditing Team"
 
     # Add teams to the Tech Department
-    dev_team = tech_dept.add_child(np.array(["Development Team", 400000], dtype=object))
-    it_team = tech_dept.add_child(np.array(["IT Support Team", 300000], dtype=object))
+    dev_team = tech_dept.add_child(np.array([400000.0]))  # Salary only
+    dev_team.name = "Development Team"
+
+    it_team = tech_dept.add_child(np.array([300000.0]))  # Salary only
+    it_team.name = "IT Support Team"
 
     # Add teams to the Sales Department
-    regional_sales_team = sales_dept.add_child(np.array(["Regional Sales Team", 350000], dtype=object))
-    online_sales_team = sales_dept.add_child(np.array(["Online Sales Team", 250000], dtype=object))
+    regional_sales_team = sales_dept.add_child(np.array([350000.0]))  # Salary only
+    regional_sales_team.name = "Regional Sales Team"
+
+    online_sales_team = sales_dept.add_child(np.array([250000.0]))  # Salary only
+    online_sales_team.name = "Online Sales Team"
 
     # Create the tree object
-    org_tree = Tree(ceo)
+    org_tree = Tree(organization)
 
     # Example usage: Find all paths of a certain salary range
-    window_size = 2  # Limit the path length to include CEO and department level
+    window_size = 3  # Limit the path length to include CEO and department level
     paths = org_tree.paths(window_size)
 
     print("Organizational Hierarchy Paths:")
     for path in paths:
-        print(path)
+        print([p.tolist() if isinstance(p, np.ndarray) else p for p in path])
 
     # Example usage: Print structure and salaries
     def print_organization(node, indent=0):
-        name, salary = node.get_data()
-        print("  " * indent + f"{name}: ${salary}")
+        data = node.get_data()
+        salary = data.item() if data is not None and isinstance(data, np.ndarray) else "N/A"
+        print("  " * indent + f"{node.name}: ${salary}")
         for child in node.children:
             print_organization(child, indent + 1)
 
@@ -162,6 +173,6 @@ if __name__ == "__main__":
     print_organization(ceo)
 
     # Example usage: Adjust salaries
-    finance_dept.set_data(np.array(["Finance Department", 550000], dtype=object))
+    finance_dept.set_data(np.array([550000.0]))  # Adjust salary
     print("\nUpdated Salaries:")
     print_organization(ceo)
