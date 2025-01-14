@@ -3,13 +3,14 @@ import numpy as np
 # from bisect import bisect_right
 from sklearn.metrics.pairwise import cosine_similarity
 
+from corticod.algorithm.tree import Node, Tree
+from corticod.algorithm.codebook import Codebook
+
 NEW_DATA_WEIGHT = 0.25
 MATURATION_ENERGY_COEFF = 10 # 50
 MATURATION_ENERGY_THRESH = 100 # 500
-
-RANGE_INIT = 50
-RANGE_LIMIT = 10
-
+DEFAULT_RANGE_INIT = 50
+DEFAULT_RANGE_LIMIT = 10
 
 class CorticalNode(Node):
     def __init__(self, range_init, parent=None):
@@ -51,8 +52,9 @@ class CorticalNode(Node):
     def find_closest_child(self, data:float) -> (int, float, bool):
         
         # check only mature children first
-        search_space = self.children.data_vector[self.children.maturity_mask]
-        if len(search_space) > 0:
+        search_space = [np.inf if self.children.maturity_mask[i] else self.children.data_vector[i] for i in range(len(self.children.data_vector))]
+        # if len(search_space) > 0:
+        if sum(self.children.maturity_mask)<len(self.children.maturity_mask):
             i = np.argmin(np.abs(search_space - data))
             found_child_data = search_space[i]
             dist = abs(found_child_data - data)
@@ -61,8 +63,9 @@ class CorticalNode(Node):
                 return self.children[i], dist
         
         # if no mature children are close enough, check immature children
-        search_space = self.children.data_vector[np.bitwise_not(self.children.maturity_mask)]
-        if len(search_space) > 0:
+        search_space = [np.inf if not self.children.maturity_mask[i] else self.children.data_vector[i] for i in range(len(self.children.data_vector))]
+        # if len(search_space) > 0:
+        if sum(self.children.maturity_mask)>0:
             i = np.argmin(np.abs(search_space - data))
             found_child_data = search_space[i]
             dist = abs(found_child_data - data)
@@ -131,7 +134,7 @@ class CorticalNode(Node):
 
 
 class CortexTree(Tree):
-    def __init__(self, window_size=8, range_init=RANGE_INIT, range_limit=RANGE_LIMIT):
+    def __init__(self, window_size=8, range_init=DEFAULT_RANGE_INIT, range_limit=DEFAULT_RANGE_LIMIT):
         super().__init__(CorticalNode(range_init))
         self.window_size = window_size
         # self.range_limit = range_limit
@@ -145,16 +148,20 @@ class CortexTree(Tree):
 
     def closest_path(self, wave):
         node = self.root
-        path = []
         for coef in wave:
             if len(node.children) > 0:
                 c, c_dist = node.find_closest_child(coef)
-                if c.is_mature():
-                    node = c
+                if c:
+                    if c.is_mature():
+                        node = c
+                        continue
+                else:
                     continue
             break
+        
+        path = []
         while(node.parent != None):
-            path.append(node.data)
+            path.insert(0, node.get_data())
             node = node.parent
         path = np.asarray(path)
         # dist = np.linalg.norm(path - wave[:len(path)])
@@ -176,17 +183,18 @@ class CortexTree(Tree):
         node = self.root
         for coef in wave:
             if len(node.children) > 0:
+                # Search among children
                 found_child, c_dist = node.find_closest_child(coef)
                 if found_child is not None:
-                    matured = found_child.update(coef, self.range_limit[found_child.level])
-                    if matured: 
-                        print(f"Node matured at level {found_child.level}")
+                    newly_matured = found_child.update(coef, self.range_limit[found_child.level])
+                    if newly_matured: 
+                        print(f"Node {found_child.get_data():.3f} matured at level {found_child.level}")
                         if found_child.level == self.window_size:
                             leafs += 1
                         added += 1
-                        break # terminate
                     node = found_child
-                    continue # go to next coef 
+                    continue # go to next coef
+            # Make new child 
             node.add_child(coef, self.range_init[node.level])
             added += 1
             break # terminate

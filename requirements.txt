@@ -3,8 +3,12 @@ pandas
 scikit-learn
 soundfile
 tqdm
+path
+scikit-image
 
---extra-index-url https://download.pytorch.org/whl/cu117
+--extra-index-url https://download.pytorch.org/whl/cu118
 torch
 torchvision
 torchaudio
+
+torchmetrics

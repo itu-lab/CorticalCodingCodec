@@ -3,16 +3,7 @@ import numpy as np
 import torch
 from sklearn.metrics.pairwise import cosine_similarity
 
-class Codebook():
-    def __init__(self, paths, weights=None) -> None:
-        if weights is not None:
-            self.weights = np.asarray(weights, dtype=np.float32)
-        else:
-            block_size = paths[0].shape[0]
-            self.weights = np.ones(block_size, dtype=np.float32)
-        self.paths = paths
-        self.paths_tensor = torch.tensor(self.paths).float()
-
+class Util():
     @staticmethod
     def handle_list_input(original_func=None, func_2D=None, func_tensor=None):
         def _decorate(func):
@@ -25,10 +16,10 @@ class Codebook():
                         signal = signal.numpy()
                 elif not isinstance(signal, np.ndarray):
                     signal = np.asarray(signal)
-                    if signal.ndim == 0:
-                        signal = signal.reshape(1)
+                    # if signal.ndim == 0:
+                    #     signal = signal.reshape(1)
 
-                if signal.ndim == 1:
+                if signal.ndim == 1 or signal.ndim == 0:
                     return func(self, signal)
                 elif signal.ndim == 2:
                     if func_2D is None:
@@ -44,6 +35,16 @@ class Codebook():
 
         return _decorate
 
+class Codebook():
+    def __init__(self, paths, weights=None) -> None:
+        if weights is not None:
+            self.weights = np.asarray(weights, dtype=np.float32)
+        else:
+            block_size = paths[0].shape[0]
+            self.weights = np.ones(block_size, dtype=np.float32)
+        self.paths = paths
+        self.paths_tensor = torch.tensor(self.paths).float()
+
     def __getitem__(self, i):
         return self.paths[i]
     
@@ -53,16 +54,16 @@ class Codebook():
     def __repr__(self):
         return f"Codebook with {len(self)} paths"
 
-    @handle_list_input
+    @Util.handle_list_input
     def distance(self, signal):
         dist = np.linalg.norm(self.paths - signal, axis=1)
         return np.min(dist)
 
-    @handle_list_input
+    @Util.handle_list_input
     def quantize(self, signal):
         return self.decode(self.encode(signal))
 
-    @handle_list_input
+    @Util.handle_list_input
     def cosine_sim(self, signal):
         quantized = self.quantize(signal)
         return cosine_similarity(quantized.reshape(1, -1), signal.reshape(1, -1))[0][0]
@@ -114,15 +115,91 @@ class Codebook():
             scaled_paths_tensor = self.paths_tensor * self.weights
             return torch.argmin(torch.sum(scaled_paths_tensor**2, axis=1, keepdims=True) - 2*torch.matmul(scaled_paths_tensor, signals.T) + torch.sum(signals.T**2, axis=0, keepdims=True), axis=0)
 
-    @handle_list_input(func_2D=encode_2d, func_tensor=encode_tensor)
+    @Util.handle_list_input(func_2D=encode_2d, func_tensor=encode_tensor)
     def encode(self, signal):
         signal *= self.weights
         scaled_paths = self.paths * self.weights
+        print(signal, scaled_paths)
+        print(np.argmin(np.linalg.norm(scaled_paths - signal, axis=1)))
         return np.argmin(np.linalg.norm(scaled_paths - signal, axis=1))
 
     def decode_tensor(self, index):
         return self.paths_tensor[index]
 
-    @handle_list_input(func_tensor=decode_tensor)
+    @Util.handle_list_input(func_tensor=decode_tensor)
     def decode(self, index):
+        print(self.paths, index)
         return self.paths[index]
+    
+
+
+
+if __name__ == "__main__":
+
+    # Example paths for the codebook (2D arrays)
+    paths = [
+        np.array([[1.0, 0.0], [0.0, 1.0]]),
+        np.array([[0.0, 1.0], [1.0, 0.0]]),
+        np.array([[1.0, 1.0], [0.0, 0.0]]),
+        np.array([[0.5, 0.5], [0.5, 0.5]])
+    ]
+
+    # # Example paths for the codebook
+    # paths = [
+    #     np.array([1.0, 0.0, 0.0]),
+    #     np.array([0.0, 1.0, 0.0]),
+    #     np.array([0.0, 0.0, 1.0]),
+    #     np.array([1.0, 1.0, 1.0])
+    # ]
+
+    # Initialize Codebook
+    codebook = Codebook(paths)
+
+    # # Example signals for testing
+    # signals = np.array([
+    #     [0.9, 0.1, 0.0],
+    #     [0.0, 0.8, 0.2],
+    #     [0.3, 0.3, 0.4],
+    #     [0.99, 0.99, 0.99]
+    # ])
+
+    # Example 2D signals for testing
+    signals = [
+        np.array([[0.9, 0.1], [0.1, 0.9]]),
+        np.array([[0.0, 0.8], [0.2, 0.0]]),
+        np.array([[0.3, 0.3], [0.4, 0.4]]),
+        np.array([[1.0, 1.0], [0.0, 0.0]])
+    ]
+
+    print("Testing Codebook Operations:\n")
+
+    # Test distance function
+    for signal in signals:
+        dist = codebook.distance(signal)
+        print(f"Distance for {signal}: {dist}")
+
+    # Test quantize function
+    for signal in signals:
+        quantized_signal = codebook.quantize(signal)
+        print(f"Quantized {signal} to {quantized_signal}")
+
+    # Test cosine similarity
+    for signal in signals:
+        similarity = codebook.cosine_sim(signal)
+        print(f"Cosine similarity for {signal}: {similarity}")
+
+    # Test encode and decode
+    for signal in signals:
+        encoded_index = codebook.encode(signal)
+        decoded_signal = codebook.decode(encoded_index)
+        print(f"Encoded {signal} to index {encoded_index}, Decoded to {decoded_signal}")
+
+    # Test tensor operations (batch encoding)
+    signals_tensor = torch.tensor(signals).float()
+    encoded_indices = codebook.encode(signals_tensor)
+    decoded_signals = codebook.decode(encoded_indices)
+
+    print("\nTensor Operations:")
+    print(f"Encoded Indices: {encoded_indices}")
+    print(f"Decoded Signals: {decoded_signals}")
+

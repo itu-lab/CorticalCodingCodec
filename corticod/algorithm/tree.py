@@ -34,6 +34,7 @@ class NodeChildren():
         self.maturity_mask = np.array([], dtype=np.bool_)
 
     def find_index(self, data:np.ndarray, side:str='left') -> 'Node':
+        # TODO: Mask kullanmak gerekiyor muydu
         return np.searchsorted(self.data_vector, data, side=side).item()
     
     def add_child(self, data:np.ndarray, new_child:Node) -> Node:
@@ -41,7 +42,7 @@ class NodeChildren():
         new_child.sibling_index = i
         self.elements.insert(i, new_child)
         self.data_vector = np.insert(self.data_vector, i, data)
-        self.maturity_mask = np.insert(self.maturity_mask, i, True) # False means not mature
+        self.maturity_mask = np.insert(self.maturity_mask, i, False) # True means mature, False means not mature
         for j in range(i+1, len(self.elements)):
             self.elements[j].sibling_index += 1
         self.count += 1
