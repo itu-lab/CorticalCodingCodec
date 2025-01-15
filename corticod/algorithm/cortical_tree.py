@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Tuple
 import numpy as np
 # from bisect import bisect_right
 from sklearn.metrics.pairwise import cosine_similarity
@@ -13,16 +13,12 @@ DEFAULT_RANGE_INIT = 50
 DEFAULT_RANGE_LIMIT = 10
 
 class CorticalNode(Node):
-    def __init__(self, range_init, parent=None):
-        super().__init__(parent)
+    def __init__(self, parent=None, range_init=DEFAULT_RANGE_INIT):
+        super().__init__(parent=parent)
         self.maturation_energy = 0
         self.pass_count: int = 1
         self.range = range_init
         self.range_init = range_init
-        
-    def add_child(self, data:float, range_init:float) -> 'CorticalNode':
-        new_child = CorticalNode(range_init, parent=self)
-        return self.children.add_child(data, new_child)
 
     def update(self, dataIn:float, range_limit:float) -> bool:
         sqpc = np.power(self.pass_count, 0.5) # square root of pass count
@@ -49,7 +45,7 @@ class CorticalNode(Node):
                 return True # matured
         return False # no change
 
-    def find_closest_child(self, data:float) -> (int, float, bool):
+    def find_closest_child(self, data:float) -> Tuple[int, float]:
         
         # check only mature children first
         search_space = [np.inf if self.children.maturity_mask[i] else self.children.data_vector[i] for i in range(len(self.children.data_vector))]
@@ -135,10 +131,8 @@ class CorticalNode(Node):
 
 class CortexTree(Tree):
     def __init__(self, window_size=8, range_init=DEFAULT_RANGE_INIT, range_limit=DEFAULT_RANGE_LIMIT):
-        super().__init__(CorticalNode(range_init))
+        super().__init__(CorticalNode(parent=None, range_init=range_init))
         self.window_size = window_size
-        # self.range_limit = range_limit
-        # self.range_init = range_init
         self.range_limit = [range_limit * ((0.9) ** lvl)
                             for lvl in range(window_size+1)]
         self.range_init = [range_init * ((0.9) ** lvl) 
@@ -174,6 +168,7 @@ class CortexTree(Tree):
             if paths.ndim == 1:
                 return 0
             self.cb = self.complete(paths)
+            self.changed = False
         return self.cb.distance(wave)
 
     def train_single(self, wave):
@@ -188,14 +183,14 @@ class CortexTree(Tree):
                 if found_child is not None:
                     newly_matured = found_child.update(coef, self.range_limit[found_child.level])
                     if newly_matured: 
-                        print(f"Node {found_child.get_data():.3f} matured at level {found_child.level}")
+                        # print(f"Node {found_child.get_data():.3f} matured at level {found_child.level}")
                         if found_child.level == self.window_size:
                             leafs += 1
                         added += 1
                     node = found_child
                     continue # go to next coef
             # Make new child 
-            node.add_child(coef, self.range_init[node.level])
+            node.add_child(coef, range_init=self.range_init[node.level])
             added += 1
             break # terminate
 
@@ -208,38 +203,29 @@ class CortexTree(Tree):
         # dist = np.linalg.norm(path - wave[:len(path)])
         return (len(path), added, leafs)
     
-    # def train_batch(self, waves):
-    #     self.changed=True
-    #     added = 0
-    #     leafs = 0
-    #     node = self.root
-    #     for coefs in waves.T:
-    #         found_children, c_dists = node.find_closest_children(coefs)
-    #         for i, found_child in enumerate(found_children):
-    #             if found_child is not None:
-    #                 matured = found_child.update(coefs[i], self.range_limit[found_child.level])
-    #                 if matured: 
-    #                     print(f"Node matured at level {found_child.level}")
-    #                     if found_child.level == self.window_size:
-    #                         leafs += 1
-    #                     added += 1
-    #                     continue
-    #                 node = found_child # this will not work for multiple children, need fix
-    #                 continue
-    #             node.add_child(coefs[i], self.range_init[node.level])
-    #             added += 1
-    #             break
-    #     return (len(waves.T), added, leafs)
+    def train_epoch(self, waves):
+        self.changed=True
+        added = 0
+        leafs = 0
+        max_depth = 0
+        for d_i, d in enumerate(waves):
+            depth, new_added, new_leaf = self.train_single(d)
+            added += new_added
+            leafs += new_leaf
+            max_depth = max(max_depth, depth)
+            if d_i % 1000 == 0: print(f"\rProgress: {100 * (d_i/len(waves)):.2f}% - {max_depth}", end="")
+        return added, leafs
     
-    # def train(self, waves, epochs=1, batch_size=1):
-    #     added = 0
-    #     leafs = 0
-    #     for _ in range(epochs):
-    #         for i in range(0, len(waves), batch_size):
-    #             l, a, lf = self.train_batch(waves[i:i+batch_size])
-    #             added += a
-    #             leafs += lf
-    #     return added, leafs
+    def train(self, waves, epochs=1):
+        added = 0
+        leafs = 0
+        for e in range(epochs): # tqdm(range(epochs), desc="Epoch"):
+            a, l = self.train_epoch(waves)
+            added += a
+            leafs += l
+            if a > 0 or l > 0:
+                print(f"\rEpoch: {e} - Added: {a}, Leaf: {l} - Codebook Length: {leafs}, Tree Size: {added}")
+        return added, leafs
 
     def complete(self, paths=None):
         if paths is None:

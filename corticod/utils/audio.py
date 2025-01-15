@@ -29,6 +29,8 @@ def get_audio_info(audio_path):
     }
 
 def get_audio_data(audio_path):
+    if audio_path.endswith('.wav'):
+        return get_audio_info(audio_path)
     wav_file = "remove_test_output.wav"
     wav_file = os.path.join(os.getcwd(), wav_file)
     if os.path.exists(wav_file):

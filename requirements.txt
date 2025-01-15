@@ -5,6 +5,10 @@ soundfile
 tqdm
 path
 scikit-image
+constriction
+matplotlib
+psutil
+requests
 
 --extra-index-url https://download.pytorch.org/whl/cu118
 torch

@@ -108,7 +108,7 @@ class Codebook():
         if matmul_bytes > gpu_free:
             max_batch_size = int(gpu_free / (self.paths_tensor.shape[0] * element_size))
             batch_size = 2**int(np.log2(max_batch_size))
-            print(f"Decided to batch process - Batch size: {batch_size}")
+            # print(f"Decided to batch process - Batch size: {batch_size}")
             return self.encode_tensor_batch(signals, batch_size)
         else:
             signals *= self.weights
@@ -119,8 +119,8 @@ class Codebook():
     def encode(self, signal):
         signal *= self.weights
         scaled_paths = self.paths * self.weights
-        print(signal, scaled_paths)
-        print(np.argmin(np.linalg.norm(scaled_paths - signal, axis=1)))
+        # print(signal, scaled_paths)
+        # print(np.argmin(np.linalg.norm(scaled_paths - signal, axis=1)))
         return np.argmin(np.linalg.norm(scaled_paths - signal, axis=1))
 
     def decode_tensor(self, index):
@@ -128,7 +128,7 @@ class Codebook():
 
     @Util.handle_list_input(func_tensor=decode_tensor)
     def decode(self, index):
-        print(self.paths, index)
+        # print(self.paths, index)
         return self.paths[index]
     
 
