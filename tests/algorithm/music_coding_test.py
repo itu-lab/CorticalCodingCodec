@@ -10,7 +10,7 @@ EPOCH = 32
 RANGE_INIT = 0.1 # 0.3
 RANGE_LIMIT = 0.005 # 0.05
 
-
+# NOTE: run from repo root to reach the paths correctly 
 train_audio_path = r"data\audio\raw\fmi_0_gt.wav"
 train_audio = audio.get_audio_data(train_audio_path)
 train_data = preprocessing.process_audio(train_audio['audio.data'], WINDOW_SIZE).numpy()
@@ -20,6 +20,8 @@ _, cdbk_len = tree.train(train_data, EPOCH)
 
 codebook = tree.complete()
 print(f"Codebook shape: {codebook.paths.shape}")
+with open('tests/calculations/codebook.npy', 'wb') as f:
+    np.save(f, codebook.paths)
 
 
 test_audio_path = r"data\audio\raw\fmi_1_gt.wav"
@@ -34,6 +36,8 @@ encoded = np.asarray(encoded)
 
 print(f"Encoded: {encoded}")
 print(f"Encoded shape: {encoded.shape}")
+with open('tests/calculations/encoded.npy', 'wb') as f:
+    np.save(f, encoded)
 
 # decode
 decoded = codebook.decode(encoded)
