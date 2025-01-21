@@ -135,7 +135,7 @@ class Codebook():
         encoded = []
         for w in data:
             encoded.append(self.encode(w))
-        encoded = np.asarray(encoded)
+        return np.asarray(encoded)
 
 
 if __name__ == "__main__":
