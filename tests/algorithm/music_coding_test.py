@@ -5,8 +5,8 @@ from corticod.utils import audio
 from corticod.utils import preprocessing
 from corticod.algorithm import cortical_tree
 
-WINDOW_SIZE = 8
 EPOCH = 32
+WINDOW_SIZE = 8
 RANGE_INIT = 0.1 # 0.3
 RANGE_LIMIT = 0.005 # 0.05
 
@@ -28,11 +28,7 @@ test_audio_path = r"data\audio\raw\fmi_1_gt.wav"
 test_audio = audio.get_audio_data(test_audio_path)
 test_data = preprocessing.process_audio(test_audio['audio.data'], WINDOW_SIZE).numpy()
 
-
-encoded = []
-for w in tqdm(test_data, desc="Window"):
-    encoded.append(codebook.encode(w))
-encoded = np.asarray(encoded)
+encoded = codebook.encode_all(test_data)
 
 print(f"Encoded: {encoded}")
 print(f"Encoded shape: {encoded.shape}")

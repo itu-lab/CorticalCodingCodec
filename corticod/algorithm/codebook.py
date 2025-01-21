@@ -131,45 +131,49 @@ class Codebook():
         # print(self.paths, index)
         return self.paths[index]
     
-
+    def encode_all(self, data):
+        encoded = []
+        for w in data:
+            encoded.append(codebook.encode(w))
+        encoded = np.asarray(encoded)
 
 
 if __name__ == "__main__":
 
     # Example paths for the codebook (2D arrays)
-    paths = [
-        np.array([[1.0, 0.0], [0.0, 1.0]]),
-        np.array([[0.0, 1.0], [1.0, 0.0]]),
-        np.array([[1.0, 1.0], [0.0, 0.0]]),
-        np.array([[0.5, 0.5], [0.5, 0.5]])
-    ]
+    # paths = [
+    #     np.array([[1.0, 0.0], [0.0, 1.0]]),
+    #     np.array([[0.0, 1.0], [1.0, 0.0]]),
+    #     np.array([[1.0, 1.0], [0.0, 0.0]]),
+    #     np.array([[0.5, 0.5], [0.5, 0.5]])
+    # ]
 
     # # Example paths for the codebook
-    # paths = [
-    #     np.array([1.0, 0.0, 0.0]),
-    #     np.array([0.0, 1.0, 0.0]),
-    #     np.array([0.0, 0.0, 1.0]),
-    #     np.array([1.0, 1.0, 1.0])
-    # ]
+    paths = [
+        np.array([1.0, 0.0, 0.0]),
+        np.array([0.0, 1.0, 0.0]),
+        np.array([0.0, 0.0, 1.0]),
+        np.array([1.0, 1.0, 1.0])
+    ]
 
     # Initialize Codebook
     codebook = Codebook(paths)
 
     # # Example signals for testing
-    # signals = np.array([
-    #     [0.9, 0.1, 0.0],
-    #     [0.0, 0.8, 0.2],
-    #     [0.3, 0.3, 0.4],
-    #     [0.99, 0.99, 0.99]
-    # ])
+    signals = np.array([
+        [0.9, 0.1, 0.0],
+        [0.0, 0.8, 0.2],
+        [0.3, 0.3, 0.4],
+        [0.99, 0.99, 0.99]
+    ])
 
     # Example 2D signals for testing
-    signals = [
-        np.array([[0.9, 0.1], [0.1, 0.9]]),
-        np.array([[0.0, 0.8], [0.2, 0.0]]),
-        np.array([[0.3, 0.3], [0.4, 0.4]]),
-        np.array([[1.0, 1.0], [0.0, 0.0]])
-    ]
+    # signals = [
+    #     np.array([[0.9, 0.1], [0.1, 0.9]]),
+    #     np.array([[0.0, 0.8], [0.2, 0.0]]),
+    #     np.array([[0.3, 0.3], [0.4, 0.4]]),
+    #     np.array([[1.0, 1.0], [0.0, 0.0]])
+    # ]
 
     print("Testing Codebook Operations:\n")
 
