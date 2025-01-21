@@ -8,6 +8,7 @@ setup(
     author_email="aeunal@hotmail.com",
     url="https://github.com/itu-lab/CorticalCodingCodec", 
     long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",  
     packages=find_packages(),
     package_dir= {
         'corticod': 'corticod',

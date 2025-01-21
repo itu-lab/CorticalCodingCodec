@@ -141,6 +141,12 @@ py_env.bak/
 .py_env312
 py_env312/
 py_env312.bak/
+.test_env
+test_env/
+test_env.bak/
+.test_env312
+test_env312/
+test_env312.bak/
 
 # Spyder project settings
 .spyderproject
@@ -181,3 +187,5 @@ cython_debug/
 *.h 
 *.lib
 /tests/calculations
+
+*.wav
