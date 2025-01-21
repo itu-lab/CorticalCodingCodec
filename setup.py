@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="corticod",
-    version="0.1.0",
+    version="0.1.1",
     description="A biomimetic cortical coding library for audio compression and signal processing.",
     author="Ahmet Emin Ünal",
     author_email="aeunal@hotmail.com",

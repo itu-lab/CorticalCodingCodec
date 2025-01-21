@@ -134,7 +134,7 @@ class Codebook():
     def encode_all(self, data):
         encoded = []
         for w in data:
-            encoded.append(codebook.encode(w))
+            encoded.append(self.encode(w))
         encoded = np.asarray(encoded)
 
 
