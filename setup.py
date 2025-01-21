@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="corticod",
-    version="1.0.0",
+    version="0.1.0",
     description="A multimedia codec library to encode and decode data with patterns.",
     author="Ahmet Emin Ünal",
     author_email="aeunal@hotmail.com",

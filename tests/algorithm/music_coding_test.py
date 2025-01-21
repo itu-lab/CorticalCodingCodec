@@ -3,19 +3,19 @@ import numpy as np
 
 from corticod.utils import audio
 from corticod.utils import preprocessing
-from corticod.algorithm import cortical_tree
+from corticod import CortexTree
 
-EPOCH = 32
+EPOCH = 8
 WINDOW_SIZE = 8
-RANGE_INIT = 0.1 # 0.3
-RANGE_LIMIT = 0.005 # 0.05
+RANGE_INIT = 0.05 # 0.3
+RANGE_LIMIT = 0.0001 # 0.05
 
 # NOTE: run from repo root to reach the paths correctly 
 train_audio_path = r"data\audio\raw\fmi_0_gt.wav"
 train_audio = audio.get_audio_data(train_audio_path)
 train_data = preprocessing.process_audio(train_audio['audio.data'], WINDOW_SIZE).numpy()
 
-tree = cortical_tree.CortexTree(window_size=WINDOW_SIZE, range_init=RANGE_INIT, range_limit=RANGE_LIMIT)
+tree = CortexTree(window_size=WINDOW_SIZE, range_init=RANGE_INIT, range_limit=RANGE_LIMIT)
 _, cdbk_len = tree.train(train_data, EPOCH)
 
 codebook = tree.complete()
